@@ -5,12 +5,14 @@ import App from './App.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faChartSimple } from '@fortawesome/free-solid-svg-icons'
-import { faBoxesStacked } from '@fortawesome/free-solid-svg-icons'
-import { faBox } from '@fortawesome/free-solid-svg-icons'
+import { faBoxesStacked, faBox, faSort, faAngleDown, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 
 library.add([faChartSimple,
     faBoxesStacked,
-    faBox,
+    faBox,,
+    faAngleDown,
+    faSort,
+    faMagnifyingGlass
 ]);
 
 createApp(App)

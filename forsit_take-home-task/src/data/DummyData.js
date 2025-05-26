@@ -9,6 +9,7 @@ export const productInventoryData = [
         id: '001',
         name: 'Lotion',
         category: 'Cosmetics',
+        // imgLink: 'https://nexton.com.pk/cdn/shop/files/aloe_vera_lotion_125ml.jpg?v=1736583174',
         price: 30,
         available_inventory: 20,
     },
