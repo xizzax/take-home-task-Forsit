@@ -3,6 +3,12 @@ import { ref } from 'vue';
 import { productCategories, productInventoryData } from '../data/DummyData.js';
 import _ from 'lodash';
 import { computed } from 'vue';
+import { AgGridVue } from 'ag-grid-vue3';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+ ModuleRegistry.registerModules([ AllCommunityModule ]);
+// import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-alpine.css'; //TODO: see if can be changed
+
 const inventoryData = ref([...productInventoryData]); //copying the array so it can be manipulated
 
 //modal for alert
@@ -108,13 +114,38 @@ const openModal = (product) => {
 const closeModal = () => {
     modalVisible.value = false;
 };
+
+const defaultColDef = ref({
+    filter: true,
+    sortable: true,
+    resizable: true,
+});
+
+
+const columnDefs = ref([
+    { headerName: "ID", field: "id", sortable: true },
+    { headerName: "Name", field: "name", sortable: true },
+    { headerName: "Category", field: "category", sortable: true },
+    { headerName: "Unit Sale Price", field: "sale_price", sortable: true },
+    { headerName: "Quantity", field: "available_inventory", sortable: true },
+    {
+        headerName: "Stock Level",
+        field: "stockLevel",
+        cellRenderer: (params) => {
+            const status = inventoryStatus(params.data);
+            const className = stockLevelClass(params.data);
+            return `<span class="${className} px-2 py-1 rounded-xl">${status}</span>`;
+        },
+    },
+
+]);
+
 </script>
 
 <template>
     <div class="mt-5">
         <div class="text-(--black)">
             <p class="ml-7 font-bold text-2xl">Inventory Management</p>
-            <p class="w-1/5 ml-10 mt-5 border-(--pink) border-0 border-b-2">All Products</p>
         </div>
         <div class="flex flex-row justify-between gap-2 mr-10 ml-10 mt-2">
             <!-- search bar -->
@@ -168,7 +199,7 @@ const closeModal = () => {
 
         <!-- inventory table -->
         <div class="mt-5 mr-10 ml-10 overflow-x-auto rounded-box border text-(--black) font-normal border-gray-200 ">
-            <table class="table">
+            <!-- <table class="table">
                 <thead class="bg-gray-300 text-black text-md ">
                     <tr class="">
                         <th class="pl-5">
@@ -199,9 +230,6 @@ const closeModal = () => {
                             </button>
                         </th>
                         <th class=""><span>Stock Level</span>
-                            <!-- <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortByInventory">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button> -->
                         </th>
                     </tr>
                 </thead>
@@ -219,7 +247,17 @@ const closeModal = () => {
                         </th>
                     </tr>
                 </tbody>
-            </table>
+            </table> -->
+            <div class="ag-theme-alpine" style="height: 500px; width: 100%;">
+                <ag-grid-vue
+  class="ag-theme-alpine"
+  style="height: 500px; width: 100%;"
+  :rowData="inventoryData"
+  :columnDefs="columnDefs"
+  :defaultColDef="defaultColDef"
+  @rowClicked="openModal"
+/>
+            </div>
         </div>
     </div>
 
@@ -251,8 +289,7 @@ const closeModal = () => {
     <!-- alert message for low stock -->
     <div role="alert" class="alert alert-error flex flex-col items-center justify-center
     p-6 z-50 rounded-2xl shadow-md w-96   top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-    fixed inset-0 text-black h-1/2"
-        v-if="lowStockProducts.length > 0 && alertModalVisible">
+    fixed inset-0 text-black h-1/2" v-if="lowStockProducts.length > 0 && alertModalVisible">
         <h2 class="font-bold text-2xl text-(--black)">Low Stock/Out of Stock Alert</h2>
         <p>The following products are running low or are out of stock:</p>
         <ul>
