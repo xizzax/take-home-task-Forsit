@@ -1,0 +1,17 @@
+#main {
+    display: flex;
+    flex-direction: row;
+}
+
+#sidebar {
+    flex: 1;
+    flex-direction: column;
+    border-right: 0.75px solid lightgrey;
+    height: 100vh;
+    margin: 0%;
+}
+
+#main-page {
+    flex: 5;
+    margin: 5px;
+}
