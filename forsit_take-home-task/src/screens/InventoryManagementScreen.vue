@@ -5,11 +5,62 @@ import _ from 'lodash';
 import { computed } from 'vue';
 import { AgGridVue } from 'ag-grid-vue3';
 import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
- ModuleRegistry.registerModules([ AllCommunityModule ]);
+ModuleRegistry.registerModules([AllCommunityModule]);
 // import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css'; //TODO: see if can be changed
 
 const inventoryData = ref([...productInventoryData]); //copying the array so it can be manipulated
+
+//modal for adding a new product
+const addProductModalVisible = ref(false);
+const closeAddProductModal = () => {
+    addProductModalVisible.value = false;
+}
+const openAddProductModal = () => {
+    addProductModalVisible.value = true;
+}
+//data for adding a new product
+const newProduct = ref({
+    id: null,
+    name: "",
+    category: "",
+    sale_price: 0,
+    cost: 0, 
+    available_inventory: 0
+});
+const addProduct = () => {
+    newProduct.value.id = productInventoryData.length + 1; //assigning a new id based on the length of the original data
+    newProduct.value.category = selectedCategory.value; //assigning the selected category from the modal
+    //check if all fields are filled
+    if (!newProduct.value.name || !newProduct.value.category || newProduct.value.sale_price <= 0 || newProduct.value.available_inventory < 0) {
+        alert("Please fill all fields correctly.");
+        return;
+    }
+    //check if id is unique
+    const existingProduct = _.find(productInventoryData, (product) => product.id === newProduct.value.id);
+    if (existingProduct) {
+        alert("Product with this ID already exists.");
+        return;
+    }
+    //add the new product to the original data
+    productInventoryData.push({ ...newProduct.value });
+    //also add it to the inventory data
+    inventoryData.value.push({ ...newProduct.value });
+    closeAddProductModal();
+    //reset the new product data
+    newProduct.value = {
+        id: null,
+        name: "",
+        category: "",
+        sale_price: 0,
+        cost: 0,
+        available_inventory: 0
+    };
+}
+
+//modal category selected
+const selectedCategory = ref("Cosmetics"); // default category
+
 
 //modal for alert
 const alertModalVisible = ref(true);
@@ -144,8 +195,15 @@ const columnDefs = ref([
 
 <template>
     <div class="mt-5">
-        <div class="text-(--black)">
+        <div class="text-(--black) flex flex-row justify-between mr-7">
             <p class="ml-7 font-bold text-2xl">Inventory Management</p>
+            <button class="btn btn-md m-0 p-5 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--pink) border-(--purple)"
+                @click="openAddProductModal">
+                <font-awesome-icon icon="fa-add" class="text-(--black) p-0 m-0" />
+                <span class="text-(--black)">
+                    Add Product
+                </span>
+            </button>
         </div>
         <div class="flex flex-row justify-between gap-2 mr-10 ml-10 mt-2">
             <!-- search bar -->
@@ -199,64 +257,9 @@ const columnDefs = ref([
 
         <!-- inventory table -->
         <div class="mt-5 mr-10 ml-10 overflow-x-auto rounded-box border text-(--black) font-normal border-gray-200 ">
-            <!-- <table class="table">
-                <thead class="bg-gray-300 text-black text-md ">
-                    <tr class="">
-                        <th class="pl-5">
-                            <span>ID</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortById">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button>
-                        </th>
-                        <th class="">
-                            <span>Name</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortByName">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button>
-                        </th>
-                        <th class=""><span>Category</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortByCategory">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button>
-                        </th>
-                        <th class=""><span>Unit Sale Price</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortBySalePrice">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button>
-                        </th>
-                        <th class=""><span>Quantity</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortByInventory">
-                                <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
-                            </button>
-                        </th>
-                        <th class=""><span>Stock Level</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody v-for="product in inventoryData">
-                    <tr class="border-b-[0.5px] border-b-(--grey) border-0 font-light hover:scale-102 hover:shadow-lg hover:bg-gray-100 transition-transform duration-200 "
-                        @click="openModal(product)">
-                        <th class="font-light pl-5">{{ product.id }}</th>
-                        <th class="font-light">{{ product.name }}</th>
-                        <th class="font-light"><span class="mt-2 mb-2 bg-(--pink) pt-1 pb-1 pl-2 pr-2 rounded-xl">{{
-                            product.category }}</span></th>
-                        <th class="font-light">{{ product.sale_price }}</th>
-                        <th class="font-light">{{ product.available_inventory }}</th>
-                        <th><span :class="stockLevelClass(product)" class="mt-2 mb-2  pt-1 pb-1 pl-4 pr-4 rounded-xl">{{
-                            inventoryStatus(product) }}</span>
-                        </th>
-                    </tr>
-                </tbody>
-            </table> -->
             <div class="ag-theme-alpine" style="height: 500px; width: 100%;">
-                <ag-grid-vue
-  class="ag-theme-alpine"
-  style="height: 500px; width: 100%;"
-  :rowData="inventoryData"
-  :columnDefs="columnDefs"
-  :defaultColDef="defaultColDef"
-  @rowClicked="openModal"
-/>
+                <ag-grid-vue class="ag-theme-alpine" style="height: 500px; width: 100%;" :rowData="inventoryData"
+                    :columnDefs="columnDefs" :defaultColDef="defaultColDef" @rowClicked="openModal" />
             </div>
         </div>
     </div>
@@ -286,6 +289,52 @@ const columnDefs = ref([
             </div>
         </div>
     </div>
+
+    <!-- modal for adding a new product -->
+    <div v-if="addProductModalVisible" class="fixed inset-0 bg-none flex justify-center items-center z-50 text-black">
+        <div class="bg-linear-to-r from-(--purple) to-(--pink) p-6 z-2 rounded-2xl shadow-md w-96">
+            <h2 class="text-xl font-bold mb-4">Add New Product</h2>
+            <form @submit.prevent="closeAddProductModal">
+                <label class="flex flex-col mb-4">
+                    <span>Product Name:</span>
+                    <input type="text" class="input btn shadow-sm shadow-gray m-0 pl-2 pr-1 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--background-color) text-(--black) border-(--black)" required />
+                </label>
+                <label class="flex flex-col mb-4 ">
+                    <span>Category:</span>
+                    <details class="dropdown">
+                        <summary class="btn btn-sm m-0 p-2 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--background-color) text-(--black)">
+                            {{ selectedCategory }}
+                            <font-awesome-icon icon="fa-angle-down" class="text-(--black) p-0 m-0" />
+                        </summary>
+                        <ul class="menu dropdown-content text-(--black) bg-(--background-color) rounded-box z-1 w-52 p-2 shadow-sm">
+                            <li v-for="category in productCategories" :key="category" @click="$event.target.closest('details').removeAttribute('open') ; selectedCategory = category">
+                                <a>{{ category }}</a>
+                            </li>
+                        </ul>
+                    </details>
+                </label>
+                <label class="flex flex-col mb-4">
+                    <span>Unit Sale Price:</span>
+                    <input type="number" step="0.01" class="input btn shadow-sm shadow-gray m-0 pl-2 pr-1 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--background-color) text-(--black) border-(--black)" required />
+                </label>
+                <label class="flex flex-col mb-4">
+                    <span>Available Inventory:</span>
+                    <input type="number" step="0.01" class="input btn shadow-sm shadow-gray m-0 pl-2 pr-1 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--background-color) text-(--black) border-(--black)" required />
+                </label>
+                <label class="flex flex-col mb-4">
+                    <span>Unit Cost Price:</span>
+                    <input type="number" step="0.01" class="input btn shadow-sm shadow-gray m-0 pl-2 pr-1 rounded-md pt-0 pb-0 mt-0 mb-0 bg-(--background-color) text-(--black) border-(--black)" required />
+                </label>
+                <div class="flex justify-end mt-4">
+                    <button type="submit" class="btn btn-sm bg-(--background-color) text-(--black)" @click="addProduct">Add Product</button>
+                </div>
+            </form>
+            <div class="flex justify-end mt-4">
+                <button @click="closeAddProductModal" class="btn btn-sm bg-(--pink) text-(--black)">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- alert message for low stock -->
     <div role="alert" class="alert alert-error flex flex-col items-center justify-center
     p-6 z-50 rounded-2xl shadow-md w-96   top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
