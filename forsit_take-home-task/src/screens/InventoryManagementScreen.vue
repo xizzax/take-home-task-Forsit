@@ -51,8 +51,8 @@ const sortByName = () => {
 const sortByCategory = () => {
     inventoryData.value = _.orderBy(inventoryData.value, ['category'], ['asc']);
 }
-const sortByPrice = () => {
-    inventoryData.value = _.orderBy(inventoryData.value, ['price'], ['asc']);
+const sortBySalePrice = () => {
+    inventoryData.value = _.orderBy(inventoryData.value, ['sale_price'], ['asc']);
 }
 const sortByInventory = () => {
     inventoryData.value = _.orderBy(inventoryData.value, ['available_inventory'], ['asc']);
@@ -188,8 +188,8 @@ const closeModal = () => {
                                 <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
                             </button>
                         </th>
-                        <th class=""><span>Unit Price</span>
-                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortByPrice">
+                        <th class=""><span>Unit Sale Price</span>
+                            <button class="btn btn-circle border-none bg-(--gray) shadow-none" @click="sortBySalePrice">
                                 <font-awesome-icon icon="fa-solid fa-sort" class="text-(--black) p-0 m-0" />
                             </button>
                         </th>
@@ -212,7 +212,7 @@ const closeModal = () => {
                         <th class="font-light">{{ product.name }}</th>
                         <th class="font-light"><span class="mt-2 mb-2 bg-(--pink) pt-1 pb-1 pl-2 pr-2 rounded-xl">{{
                             product.category }}</span></th>
-                        <th class="font-light">{{ product.price }}</th>
+                        <th class="font-light">{{ product.sale_price }}</th>
                         <th class="font-light">{{ product.available_inventory }}</th>
                         <th><span :class="stockLevelClass(product)" class="mt-2 mb-2  pt-1 pb-1 pl-4 pr-4 rounded-xl">{{
                             inventoryStatus(product) }}</span>
@@ -228,9 +228,9 @@ const closeModal = () => {
         <div class="bg-linear-to-r from-(--purple) to-(--pink) p-6 z-2 rounded-2xl shadow-md w-96">
             <h2 class="text-xl font-bold mb-4">Update Inventory</h2>
             <div>
-                <!-- only updating inventory, displaying product, unit price and category wihtouy changing -->
+                <!-- only updating inventory, displaying product, unit salew price and category wihtouy changing -->
                 <p class="">Product: {{ selectedProduct.name }}</p>
-                <p class="">Unit Price: {{ selectedProduct.price }}</p>
+                <p class="">Unit Sale Price: {{ selectedProduct.sale_price }}</p>
                 <p class="">Category: {{ selectedProduct.category }}</p>
                 <label class="flex flex-col items-center">
                     <p class="mt-5">Quantity to Add:</p>

@@ -15,6 +15,7 @@ library.add([faChartSimple,
     faMagnifyingGlass
 ]);
 
+
 createApp(App)
     .component('font-awesome-icon', FontAwesomeIcon)
     .mount('#app')

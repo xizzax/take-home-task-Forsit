@@ -1,6 +1,8 @@
 <script setup>
 import SideBarButton from './SideBarButton.vue'
 import { ref } from 'vue'
+const emit = defineEmits(['navigate']);
+
 
 const selected = ref("revenue")
 const revenueSelected = ref(true)
@@ -12,6 +14,7 @@ function onPressRevenue() {
   revenueSelected.value = true
   inventorySelected.value = false
   productsSelected.value = false
+  emit('navigate', 'revenue');
 }
 
 function onPressInventory() {
@@ -19,14 +22,15 @@ function onPressInventory() {
   revenueSelected.value = false
   inventorySelected.value = true
   productsSelected.value = false
+  emit('navigate', 'inventory');
 }
 
-function onPressProducts() {
-  selected.value = "products"
-  revenueSelected.value = false
-  inventorySelected.value = false
-  productsSelected.value = true
-}
+// function onPressProducts() {
+//   selected.value = "products"
+//   revenueSelected.value = false
+//   inventorySelected.value = false
+//   productsSelected.value = true
+// }
 
 console.log(selected);
 </script>
@@ -44,7 +48,7 @@ console.log(selected);
       :selected="revenueSelected" />
     <SideBarButton btnTitle="Inventory" iconTitle="fa-boxes-stacked" :onPressFtn="onPressInventory"
       :selected="inventorySelected" />
-    <SideBarButton btnTitle="Products" iconTitle="fa-box" :onPressFtn="onPressProducts" :selected="productsSelected" />
+    <!-- <SideBarButton btnTitle="Products" iconTitle="fa-box" :onPressFtn="onPressProducts" :selected="productsSelected" /> -->
   </div>
 </template>
 
